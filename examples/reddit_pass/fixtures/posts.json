@@ -1,0 +1,8 @@
+[
+  {"id": "a1", "subreddit": "LLMDevs", "title": "Temperature 0 but classification still flips between runs",
+   "selftext": "Labeling 40k product reviews into 8 buckets. Re-running the same batch changes ~5% of labels. How do people get stable labels?"},
+  {"id": "a2", "subreddit": "Bookkeeping", "title": "Using ChatGPT to categorize client transactions - anyone else?",
+   "selftext": "It does ok but I have to re-check everything because it changes its mind on similar vendors. Would love a way to only review the doubtful ones."},
+  {"id": "a3", "subreddit": "LangChain", "title": "Best way to write a summary of a 200 page PDF?",
+   "selftext": "Looking for chunking strategies for long-form summarization."}
+]
