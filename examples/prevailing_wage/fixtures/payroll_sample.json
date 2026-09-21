@@ -1,0 +1,13 @@
+{
+  "project": "Elementary school modernization, Building construction type",
+  "week_ending": "2026-09-19",
+  "worker_weeks": [
+    {"name": "Worker A", "employer_label": "Laborer", "employer_code": "LABO0002-003", "rate": 36.10, "fringe": 21.30,
+     "duties": "Ran the CAT 320 excavator for trenching along the north wall three days; hand-shoveled and cleaned up the other two.",
+     "equipment": "CAT 320 excavator", "timecard_notes": "Mon-Wed excavator, Thu-Fri cleanup"},
+    {"name": "Worker B", "employer_label": "Electrician apprentice", "employer_code": "ELEC0011-004", "rate": 34.86, "fringe": 24.35,
+     "duties": "Pulled wire and installed conduit under journeyman supervision.", "equipment": "", "timecard_notes": ""},
+    {"name": "Worker C", "employer_label": "Laborer", "employer_code": "LABO0002-003", "rate": 36.10, "fringe": 0,
+     "duties": "Installed and tested copper water lines and fixtures in restrooms.", "equipment": "Press tool, torch", "timecard_notes": ""}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "note": "Illustrative subset shaped like a Davis-Bacon general decision. Replace with a real WD from SAM.gov.",
+  "classifications": [
+    {"code": "ELEC0011-004", "title": "ELECTRICIAN (Including Low Voltage Wiring)", "rate": 58.10, "fringe": 24.35,
+     "scope": "Installation, maintenance and repair of electrical wiring, conduit, fixtures and controls."},
+    {"code": "ENGI0012-003", "title": "POWER EQUIPMENT OPERATOR: Excavator, Loader, Backhoe", "rate": 52.40, "fringe": 30.02,
+     "scope": "Operates self-propelled excavation and loading equipment."},
+    {"code": "ENGI0012-005", "title": "POWER EQUIPMENT OPERATOR: Forklift", "rate": 49.85, "fringe": 30.02},
+    {"code": "LABO0002-003", "title": "LABORER: Common or General", "rate": 36.10, "fringe": 21.30,
+     "scope": "Manual labor including cleanup, material handling by hand, and trenching by hand."},
+    {"code": "LABO0002-007", "title": "LABORER: Pipelayer", "rate": 38.25, "fringe": 21.30},
+    {"code": "PLUM0016-001", "title": "PLUMBER", "rate": 60.02, "fringe": 27.11},
+    {"code": "CARP0022-001", "title": "CARPENTER", "rate": 49.30, "fringe": 25.16}
+  ]
+}
