@@ -68,7 +68,7 @@ export function guardPlayer(x = 0, z = 0, opts: { grips?: 'sleeves' | 'collar' |
     pose: 'supine',
     joints: { neck: [30, 0, 0] },
     root: { at: world(x, 0.12, z), rot: O.supine, k: 0.8, rk: 1 },
-    ghost: ['shinL', 'shinR', 'footL', 'footR'],
+    ghost: ['thighL', 'thighR', 'shinL', 'shinR', 'footL', 'footR'],
     reach: ['legL', 'legR'],
     limbs: {
       // Ankles cross behind the partner's lower back.
@@ -133,6 +133,8 @@ export function sideControlTop(opts: { crossface?: boolean; underhook?: boolean;
     pose: 'heavyChest',
     joints: { lumbar: [5, 0, 0], thoracic: [5, 0, 0], neck: [-15, 0, 0] },
     root: { at: other('belly', [0.32, 0.12, opts.hipsHigh ? 0.3 : 0.1]), rot, k: 3, rk: 2.2 },
+    // Crossface and underhook arms slide under his head and back.
+    ghost: ['forearmL', 'forearmR'],
     limbs: {
       // Crossface: near-head arm under his neck, shoulder in his jaw.
       [arm(headSide)]: crossface
@@ -186,7 +188,7 @@ export function halfGuardBottom(opts: { underhook?: boolean } = {}): AthleteGoal
   return {
     pose: 'supine',
     joints: { neck: [30, 0, 0] },
-    root: { at: world(0, 0.13, 0), rot: turn(O.supine, [0, 0, 1], -20), k: 0.8, rk: 1 },
+    root: { at: world(0, 0.14, 0), rot: turn(O.supine, [0, 0, 1], -40), k: 1.2, rk: 1.5 },
     ghost: ['shinL', 'shinR', 'footL', 'footR', 'forearmL'],
     limbs: {
       // Left leg hooks over his calf, right leg under: his right leg is trapped.
@@ -253,9 +255,9 @@ export function kneeOnBellyTop(): AthleteGoal {
   return {
     pose: 'kneel',
     joints: { lumbar: [12, 0, 0], thoracic: [5, 0, 0], neck: [15, 0, 0] },
-    root: { at: world(0.3, 0.58, -0.1), rot, k: 4, rk: 4 },
+    root: { at: world(0.28, 0.52, -0.12), rot, k: 4, rk: 4 },
     limbs: {
-      [leg(hipSide)]: { mid: world(0.02, 0.27, -0.1), lowerDir: [-1, -0.25, 0.5], lowerIn: 'world' },
+      [leg(hipSide)]: { mid: world(0.0, 0.2, -0.14), lowerDir: [-1, -0.2, 0.45], lowerIn: 'world' },
       [leg(flip(hipSide))]: { to: world(0.82, 0.09, -0.22), pole: [0, 0, 1] },
       [arm(hipSide)]: { to: other('hipL', [0.05, 0.02, 0.09]), pole: [0.3, -0.5, -1] },
       [arm(flip(hipSide))]: { to: other('sternum', [-0.04, 0.1, 0.1]), pole: [-0.3, -0.5, -1] },
@@ -272,6 +274,7 @@ export function northSouthTop(): AthleteGoal {
     pose: 'heavyChest',
     joints: { neck: [-25, 0, 0] },
     root: { at: world(0, 0.33, -0.9), rot, k: 2.5, rk: 2 },
+    ghost: ['forearmL', 'forearmR'],
     limbs: {
       legL: { mid: self('hipL', [0.14, -0.3, 0.22], MAT), lowerDir: [0.1, -1, -0.06] },
       legR: { mid: self('hipR', [-0.14, -0.3, 0.22], MAT), lowerDir: [-0.1, -1, -0.06] },

@@ -128,8 +128,8 @@ export class AthleteController {
       b.root.active = true;
       b.root.pos.copy(this.holdPose.pos);
       b.root.quat.copy(this.holdPose.quat);
-      b.root.posK = Math.max(this.holdK, Math.min(g.root?.k ?? 0, 5));
-      b.root.rotK = Math.max(this.holdK, Math.min(g.root?.rk ?? 0, 5));
+      b.root.posK = Math.max(this.holdK, Math.min(g.root?.k ?? 0, 7));
+      b.root.rotK = Math.max(this.holdK, Math.min(g.root?.rk ?? 0, 7));
     } else if (g.root) {
       const target = this.resolve(g.root.at);
       const rot = g.root.rot ? rootQuat(g.root.rot) : b.segQuat('pelvis');

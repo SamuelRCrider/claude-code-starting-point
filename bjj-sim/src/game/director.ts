@@ -172,7 +172,7 @@ export class Director {
   tweak(k: Keyframe) {
     this.sim.ctl.top.overrides.clear();
     this.sim.ctl.bottom.overrides.clear();
-    this.sim.apply(k);
+    this.sim.transition(k, 'track');
   }
 }
 

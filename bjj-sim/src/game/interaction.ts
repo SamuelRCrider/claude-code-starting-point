@@ -45,6 +45,9 @@ export interface InteractionHooks {
   onSnap?(d: DragState): void;
 }
 
+/** Finger-sized snap radius (Apple HIG 44 pt). */
+const SNAP_PX = 44;
+
 const HANDLE_PARTS: { part: DragPart; mode: 'end' | 'mid' }[] = [
   { part: 'armL', mode: 'end' }, { part: 'armR', mode: 'end' },
   { part: 'legL', mode: 'mid' }, { part: 'legR', mode: 'mid' },
@@ -145,13 +148,20 @@ export class Interaction {
     if (!this.ray.ray.intersectPlane(d.plane, p)) return;
     p.add(d.grabOffset);
     p.y = Math.max(p.y, 0.05);
-    // Magnetic snap toward the step's target.
+    // Magnetic snap toward the step's target, judged on screen (where the finger is),
+    // not in depth along the drag plane.
     const snap = this.hooks.snapFor(d.who, d.part);
     const wasSnapped = d.snapped;
-    d.snapped = !!snap && p.distanceTo(snap) < 0.14;
+    d.snapped = !!snap && (p.distanceTo(snap) < 0.14 || this.screenDist(e, snap) < SNAP_PX);
     d.target.copy(d.snapped ? snap! : p);
     if (d.snapped && !wasSnapped) this.hooks.onSnap?.(d);
     this.applyOverride();
+  }
+
+  private screenDist(e: PointerEvent, p: THREE.Vector3) {
+    const rect = this.r.canvas.getBoundingClientRect();
+    const s = p.clone().project(this.r.camera);
+    return Math.hypot(((s.x + 1) / 2) * rect.width - (e.clientX - rect.left), ((1 - s.y) / 2) * rect.height - (e.clientY - rect.top));
   }
 
   private up(e: PointerEvent) {

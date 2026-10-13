@@ -345,6 +345,17 @@ export class Ragdoll {
     }
   }
 
+  private slick = false;
+  /**
+   * While executing a scripted move an athlete shifts weight to slide knees and
+   * hips; modelled as lower friction so the move isn't pinned by its own weight.
+   */
+  setMoving(on: boolean) {
+    if (on === this.slick) return;
+    this.slick = on;
+    for (const c of this.colliders) c.setFriction(on ? 0.25 : 0.9);
+  }
+
   private calm = false;
   /**
    * Resting athletes get extra damping so tightly entangled holds don't buzz;

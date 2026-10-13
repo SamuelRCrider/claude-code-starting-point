@@ -15,7 +15,9 @@ export interface Pose {
 }
 
 const env = (globalThis as { process?: { env: Record<string, string> } }).process?.env ?? {};
-const TRACK_K = Number(env.TK ?? 4);
+const TRACK_K = Number(env.TK ?? 5);
+const LIMB_JOINTS = new Set<JointName>(['shoulderL', 'elbowL', 'shoulderR', 'elbowR', 'hipL', 'kneeL', 'hipR', 'kneeR']);
+const REAIM_PASSES = Number(env.REAIM ?? 0);
 const MAX_SPEED = 3.5; // m/s per segment
 const MAX_SPIN = 14; // rad/s per segment
 const SOLVE_HZ = Number(env.SOLVE_HZ ?? 12);
@@ -133,6 +135,7 @@ export class Sim {
         rd.root.active = true;
         rd.root.pos.lerpVectors(a.pos, b.pos, s);
         rd.root.quat.slerpQuaternions(a.quat, b.quat, s);
+        rd.setMoving(true);
         rd.root.posK = TRACK_K;
         rd.root.rotK = TRACK_RK;
         rd.pulls.length = 0;
@@ -146,6 +149,8 @@ export class Sim {
       }
       if (g.t >= g.dur + 0.15) {
         this.tracking = null;
+        this.top.setMoving(false);
+        this.bottom.setMoving(false);
         this.holdSolved(g);
       }
     } else {
@@ -225,12 +230,17 @@ export class Sim {
     const dur = k.dur ?? 1;
     this.glide = null;
     this.tracking = null;
+    this.top.setMoving(false);
+    this.bottom.setMoving(false);
     const from = { top: this.pose('top'), bottom: this.pose('bottom') };
     const goals = { top: this.ctl.top.goal, bottom: this.ctl.bottom.goal };
     const full = { top: k.top ?? goals.top, bottom: k.bottom ?? goals.bottom };
     const to = this.solve(full, true);
     const job = { t: 0, dur, from, to, k: full };
-    if (mode === 'glide') this.glide = job;
+    // Big whole-body relocations glide to the solved pose (then physics takes over);
+    // small adjustments are tracked by the muscles with physics on the whole way.
+    const big = (['top', 'bottom'] as Who[]).some((w) => from[w].pos.distanceTo(to[w].pos) > 0.15 || from[w].quat.angleTo(to[w].quat) > 0.55);
+    if (mode === 'glide' || big) this.glide = job;
     else this.tracking = job;
   }
 
@@ -263,9 +273,26 @@ export class Sim {
     }
     this.world.integrationParameters.contact_natural_frequency = SOLVE_HZ;
     for (let i = 0; i < 100; i++) this.stepOnce();
+    // Bodies have settled onto each other: re-aim every limb at its intent from where
+    // things actually are now, keep the hips where they landed, and settle again.
+    for (let pass = 0; pass < REAIM_PASSES; pass++) {
+      for (const who of ['top', 'bottom'] as Who[]) {
+        const c = this.ctl[who];
+        const hold = c.holdPose!;
+        c.holdPose = null;
+        const desired = c.computeDesired();
+        // Spine/neck keep the settled shape; limbs take the re-aimed IK.
+        const settled = this.pose(who).locals;
+        for (const j of JOINTS) if (!LIMB_JOINTS.has(j.name)) desired.set(j.name, settled[j.name]);
+        c.holdPose = { locals: desired, pos: hold.pos, quat: hold.quat };
+      }
+      for (let i = 0; i < 60; i++) this.stepOnce();
+    }
+    // Finish with runtime-stiff contacts so the captured pose has no overlap left to pop.
     this.world.integrationParameters.contact_natural_frequency = 30;
+    for (let i = 0; i < 40; i++) this.stepOnce();
     this.ctl.top.holdK = this.ctl.bottom.holdK = HOLD_K;
-    if (env.DEBUG_SOLVE) console.log('[solve] KE after settle', (this.top.kineticEnergy() + this.bottom.kineticEnergy()).toFixed(1));
+    if (env.DEBUG_SOLVE) console.log('[solve] KE after settle', (this.top.kineticEnergy() + this.bottom.kineticEnergy()).toFixed(1), 'top pelvis', this.top.segPos('pelvis').toArray().map((x) => x.toFixed(2)).join(','), 'root tgt', this.top.root.pos.toArray().map((x) => x.toFixed(2)).join(','));
     const to = { top: this.pose('top'), bottom: this.pose('bottom') };
     this.noGrips = false;
     if (saved) this.restoreBodies(saved);

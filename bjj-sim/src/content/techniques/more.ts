@@ -13,8 +13,7 @@ const flatBottom = () => merge(supineAt(0, 0), { limbs: { ...framesTight(), ...f
 const armbarFinish = (hipsUp: boolean) => ({
   pose: 'sit',
   joints: hipsUp ? { lumbar: [-10, 0, 0] as [number, number, number] } : {},
-  root: { at: other('armpitR', [-0.2, -0.04, 0.0], hipsUp ? 0.16 : 0.14), rot: orient([-1, hipsUp ? 0.08 : 0.35, 0], [0.1, 1, 0.1]), k: 3.5, rk: 2.5 },
-  ghost: ['thighL', 'shinL', 'footL'] as ('thighL' | 'shinL' | 'footL')[],
+  root: { at: other('armpitR', [-0.2, -0.04, 0.0], hipsUp ? 0.16 : 0.14), rot: hipsUp ? orient([-1, 0.08, 0], [0.05, 1, 0.1]) : orient([-1, 0.35, 0], [0.2, 0.9, 0.1]), k: 3.5, rk: 2.5 },
   limbs: {
     legL: { to: other('ear_L', [0.1, 0.05, 0.05], 0.1), pole: [0, 1, 0.3] as [number, number, number] },
     legR: { to: other('hipL', [0.0, 0.2, 0.06], 0.12), pole: [0, 1, 0.3] as [number, number, number] },
@@ -177,25 +176,15 @@ export const MORE_TECHNIQUES: Technique[] = [
       {
         say: 'He pushes your knee with a straight far arm.',
         auto: true,
-        key: { bottom: merge(flatBottom(), { limbs: { armR: { to: other('kneeL', [0, 0.05, 0.05]), pole: [-0.5, -1, 0], tension: 1.2 } } }), dur: 0.8 },
+        key: { bottom: merge(flatBottom(), { limbs: { armR: { to: self('belly', [0.1, 0.06, 0.24]), pole: [-0.5, -1, 0] } } }), dur: 0.8 },
       },
       {
-        say: 'Trap that arm to your chest with both hands.',
-        drag: { who: 'top', part: 'armR' },
-        intent: 'Catch the arm',
-        key: {
-          top: merge(kneeOnBellyTop(), {
-            limbs: { armR: { to: other('wristR'), pole: [0, -0.5, -1], grip: true }, armL: { to: other('elbowR'), pole: [0, -0.5, -1], grip: true } },
-          }),
-          dur: 0.9,
-        },
-      },
-      {
-        say: 'Step your base leg around his head and sit down by his shoulder.',
+        say: 'Catch that arm to your chest, step your base leg around his head and sit by his shoulder.',
+        why: 'Keep the arm glued to your chest the whole way around.',
         drag: { who: 'top', part: 'hips' },
-        intent: 'Step around',
+        intent: 'Catch and step around',
         cinematic: true,
-        key: { top: armbarFinish(false), bottom: merge(supineAt(0, 0), { limbs: { armR: { to: other('sternum', [0, 0.05, 0.1]), tension: 0.4 } } }), dur: 1.4 },
+        key: { top: armbarFinish(false), bottom: merge(supineAt(0, 0), { limbs: { armR: { to: other('sternum', [0, 0.05, 0.1]), tension: 0.4 } } }), dur: 1.5 },
       },
       {
         say: 'Thumb up, squeeze the knees, lift the hips. Tap.',
@@ -212,23 +201,21 @@ export const MORE_TECHNIQUES: Technique[] = [
     role: 'top',
     from: 'knee-on-belly',
     to: 'mount',
-    summary: 'Keep your grips, slide the knee across his belly to the mat and bring the base leg in.',
+    summary: 'Keep your grips, walk the base foot in, slide the knee across his belly to the mat and sit into mount.',
     steps: [
       {
-        say: 'Slide your knee across his belly to the far side.',
-        drag: { who: 'top', part: 'legL' },
-        intent: 'Slide across',
-        key: {
-          top: merge(kneeOnBellyTop(), { root: { at: world(0.15, 0.45, -0.12), rot: orient([-0.1, 1, 0.1], [-1, -0.2, 0.2]), k: 4, rk: 3.5 }, limbs: { legL: { mid: world(-0.28, MAT, -0.15), lowerDir: [0, -0.2, 1], lowerIn: 'world' } } }),
-          dur: 1.0,
-        },
+        say: 'Walk your base foot in closer to his hip.',
+        why: 'A closer base lets you swing the knee across without falling over him.',
+        drag: { who: 'top', part: 'legR' },
+        intent: 'Foot in',
+        key: { top: merge(kneeOnBellyTop(), { limbs: { legR: { to: world(0.5, 0.09, -0.15), pole: [0, 0, 1] } } }), dur: 0.9 },
       },
       {
-        say: 'Bring your base leg in and sit down: mount.',
+        say: 'Slide your knee across his belly to the far side and sit down: mount.',
         drag: { who: 'top', part: 'hips' },
         intent: 'Mount',
         cinematic: true,
-        key: { top: mountTop(), bottom: mountBottom(), dur: 1.2 },
+        key: { top: mountTop(), bottom: mountBottom(), dur: 1.4 },
       },
     ],
   },

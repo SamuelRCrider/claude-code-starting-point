@@ -35,7 +35,7 @@ export const mountChecks: Check[] = [
     test: (c) => {
       const kl = c.local('bottom', 'abdomen', c.lm('top', 'kneeL'));
       const kr = c.local('bottom', 'abdomen', c.lm('top', 'kneeR'));
-      return Math.abs(kl.x) < 0.34 && Math.abs(kr.x) < 0.34 && kl.x * kr.x < 0;
+      return Math.abs(kl.x) < 0.46 && Math.abs(kr.x) < 0.46 && kl.x * kr.x < 0;
     },
   },
   {
@@ -58,8 +58,11 @@ export const mountChecks: Check[] = [
     id: 'M3', who: 'top', label: 'High mount',
     why: 'Knees above his elbows remove the elbow-knee escape.',
     test: (c) => {
+      // Knees up by his armpits, above his elbows.
+      const pit = along(c, c.lm('bottom', 'armpitL'));
       const el = Math.max(along(c, c.lm('bottom', 'elbowL')), along(c, c.lm('bottom', 'elbowR')));
-      return Math.min(along(c, c.lm('top', 'kneeL')), along(c, c.lm('top', 'kneeR'))) > el;
+      const k = Math.min(along(c, c.lm('top', 'kneeL')), along(c, c.lm('top', 'kneeR')));
+      return k > el && k > pit - 0.14;
     },
   },
   {
@@ -83,7 +86,7 @@ const guardChecks: Check[] = [
   {
     id: 'G1', who: 'bottom', label: 'Guard closed',
     why: 'Ankles crossed behind his back: he cannot pass without opening them.',
-    test: (c) => c.lm('bottom', 'heelL').distanceTo(c.lm('bottom', 'heelR')) < 0.3 && c.local('top', 'pelvis', c.lm('bottom', 'heelL')).z < 0.05,
+    test: (c) => c.lm('bottom', 'heelL').distanceTo(c.lm('bottom', 'heelR')) < 0.9 && c.local('top', 'pelvis', c.lm('bottom', 'heelL')).z < 0 && c.local('top', 'pelvis', c.lm('bottom', 'heelR')).z < 0,
   },
   {
     id: 'G3', who: 'bottom', label: 'Posture broken',
@@ -141,7 +144,7 @@ const sideChecks: Check[] = [
   {
     id: 'S5', who: 'top', label: 'Knees blocking',
     why: 'A knee tight to his hip stops his knee sliding in.',
-    test: (c) => (['kneeL', 'kneeR'] as const).some((k) => c.lm('top', k).distanceTo(c.lm('bottom', 'hipL')) < 0.3),
+    test: (c) => (['kneeL', 'kneeR'] as const).some((k) => c.lm('top', k).distanceTo(c.lm('bottom', 'hipL')) < 0.4),
   },
   {
     id: 'S6', who: 'bottom', label: 'Frames in',
@@ -192,12 +195,12 @@ const backChecks: Check[] = [
   {
     id: 'B2', who: 'top', label: 'Hooks in',
     why: 'Heels inside his thighs steer his hips. Never cross your ankles.',
-    test: (c) => c.lm('top', 'heelL').distanceTo(c.lm('bottom', 'kneeL')) < 0.35 && c.lm('top', 'heelR').distanceTo(c.lm('bottom', 'kneeR')) < 0.35,
+    test: (c) => c.lm('top', 'heelL').distanceTo(c.lm('bottom', 'hipR')) < 0.5 && c.lm('top', 'heelR').distanceTo(c.lm('bottom', 'hipL')) < 0.5,
   },
   {
     id: 'B4', who: 'top', label: 'Seatbelt',
     why: 'One arm over the shoulder, one under: he cannot turn either way.',
-    test: (c) => c.lm('top', 'handL').distanceTo(c.lm('top', 'handR')) < 0.25 && c.lm('top', 'handR').distanceTo(c.lm('bottom', 'sternum')) < 0.3,
+    test: (c) => c.lm('top', 'handL').distanceTo(c.lm('top', 'handR')) < 0.36 && c.lm('top', 'handR').distanceTo(c.lm('bottom', 'sternum')) < 0.32,
   },
   {
     id: 'B3', who: 'top', label: 'Ankles uncrossed',
@@ -220,7 +223,7 @@ const kobChecks: Check[] = [
   {
     id: 'K1', who: 'top', label: 'Knee on belly',
     why: 'Knee and shin across his belly: your weight goes through one point.',
-    test: (c) => (['kneeL', 'kneeR'] as const).some((k) => c.lm('top', k).distanceTo(c.lm('bottom', 'belly')) < 0.2),
+    test: (c) => (['kneeL', 'kneeR'] as const).some((k) => c.lm('top', k).distanceTo(c.lm('bottom', 'belly')) < 0.36),
   },
   {
     id: 'K2', who: 'top', label: 'Base leg wide',
@@ -250,9 +253,12 @@ const nsChecks: Check[] = [
     test: (c) => c.lm('top', 'sternum').distanceTo(c.lm('bottom', 'sternum')) < 0.3 && c.lm('top', 'hipsCenter').y < 0.45,
   },
   {
-    id: 'N3', who: 'top', label: 'Arms inside',
-    why: 'Your arms under his armpits stop him framing.',
-    test: (c) => handBehind(c, 'top', 'bottom', ['handL']) || handBehind(c, 'top', 'bottom', ['handR']),
+    id: 'N3', who: 'top', label: 'Arms in tight',
+    why: 'Arms wrapped tight around his upper body stop him framing.',
+    test: (c) => (['handL', 'handR'] as const).every((h) => {
+      const p = c.local('bottom', 'chest', c.lm('top', h));
+      return Math.abs(p.x) > 0.12 && Math.abs(p.x) < 0.4 && p.z < 0.26;
+    }),
   },
   {
     id: 'N9', who: 'bottom', label: 'Elbows in',
@@ -265,7 +271,7 @@ const turtleChecks: Check[] = [
   {
     id: 'T2', who: 'bottom', label: 'Elbows to knees',
     why: 'No gap between elbows and knees means no hooks.',
-    test: (c) => c.lm('bottom', 'elbowL').distanceTo(c.lm('bottom', 'kneeL')) < 0.25 && c.lm('bottom', 'elbowR').distanceTo(c.lm('bottom', 'kneeR')) < 0.25,
+    test: (c) => c.lm('bottom', 'elbowL').distanceTo(c.lm('bottom', 'kneeL')) < 0.5 && c.lm('bottom', 'elbowR').distanceTo(c.lm('bottom', 'kneeR')) < 0.5,
   },
   {
     id: 'T1', who: 'bottom', label: 'Hips low',
@@ -280,7 +286,7 @@ const turtleChecks: Check[] = [
   {
     id: 'T4', who: 'top', label: 'Seatbelt',
     why: 'Over one shoulder, under the other armpit: you go where he goes.',
-    test: (c) => c.lm('top', 'handL').distanceTo(c.lm('top', 'handR')) < 0.3,
+    test: (c) => c.lm('top', 'handL').distanceTo(c.lm('top', 'handR')) < 0.45,
   },
 ];
 
