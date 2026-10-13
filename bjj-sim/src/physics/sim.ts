@@ -16,6 +16,8 @@ export interface Pose {
 
 const env = (globalThis as { process?: { env: Record<string, string> } }).process?.env ?? {};
 const TRACK_K = Number(env.TK ?? 4);
+const MAX_SPEED = 3.5; // m/s per segment
+const MAX_SPIN = 14; // rad/s per segment
 const SOLVE_HZ = Number(env.SOLVE_HZ ?? 12);
 const LIFT = Number(env.LIFT ?? 0.12);
 const HOLD_K = Number(env.HOLD_K ?? 2.2);
@@ -137,7 +139,9 @@ export class Sim {
         // Bleed off energy so contact fights don't launch anyone.
         for (const b of rd.bodies) {
           const v = b.linvel();
+          const w = b.angvel();
           b.setLinvel({ x: v.x * 0.985, y: v.y * 0.985, z: v.z * 0.985 }, true);
+          b.setAngvel({ x: w.x * 0.97, y: w.y * 0.97, z: w.z * 0.97 }, true);
         }
       }
       if (g.t >= g.dur + 0.15) {
@@ -156,6 +160,17 @@ export class Sim {
     this.top.applyControl(STEP);
     this.bottom.applyControl(STEP);
     this.world.step();
+    // Speed limits: grappling is slow and heavy. Contact fights must never launch a limb.
+    for (const rd of [this.top, this.bottom]) {
+      for (const b of rd.bodies) {
+        const v = b.linvel();
+        const sp = Math.hypot(v.x, v.y, v.z);
+        if (sp > MAX_SPEED) { const k = MAX_SPEED / sp; b.setLinvel({ x: v.x * k, y: v.y * k, z: v.z * k }, true); }
+        const w = b.angvel();
+        const ws = Math.hypot(w.x, w.y, w.z);
+        if (ws > MAX_SPIN) { const k = MAX_SPIN / ws; b.setAngvel({ x: w.x * k, y: w.y * k, z: w.z * k }, true); }
+      }
+    }
     this.time += STEP;
   }
 

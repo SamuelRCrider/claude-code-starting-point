@@ -97,8 +97,8 @@ export function inGuard(opts: { posture?: 'up' | 'broken'; at?: Ref; rot?: Q4 } 
     },
     limbs: {
       // Knees planted wide in front of your own hips (combat base), shins back.
-      legL: { mid: self('hipL', [0.1, 0, 0.3], MAT), lowerDir: [0.1, -0.3, -1] },
-      legR: { mid: self('hipR', [-0.1, 0, 0.3], MAT), lowerDir: [-0.1, -0.3, -1] },
+      legL: { mid: self('hipL', [0.1, 0, 0.3], MAT), lowerDir: [0.1, 0.06, -1] },
+      legR: { mid: self('hipR', [-0.1, 0, 0.3], MAT), lowerDir: [-0.1, 0.06, -1] },
       armL: broken ? { to: other('sternum', [-0.18, 0.1, 0.05]), pole: [0.5, -0.3, -1] } : { to: other('hipR', [0.02, 0.06, 0.09]), pole: [0.5, -0.3, -1] },
       armR: broken ? { to: other('sternum', [0.18, 0.1, 0.05]), pole: [-0.5, -0.3, -1] } : { to: other('hipL', [-0.02, 0.06, 0.09]), pole: [-0.5, -0.3, -1] },
     },
@@ -202,47 +202,44 @@ export function halfGuardBottom(opts: { underhook?: boolean } = {}): AthleteGoal
 
 // --------------------------------------------------------------------- back control
 
-const backRot = (recline: number): Q4 => {
-  const r = (recline * Math.PI) / 180;
-  return orient([0, Math.cos(r), Math.sin(r)], [0, Math.sin(r), -Math.cos(r)]);
-};
-
-/** Attacker sitting behind, chest to his back, hooks in, seatbelt (right arm over the shoulder). */
+/**
+ * Back control on the ground: the attacker on their back, the defender lying on
+ * top of them facing up, both heads toward -Z. Gravity holds it together.
+ */
 export function backTop(opts: { choke?: boolean } = {}): AthleteGoal {
   return {
-    pose: 'sit',
+    pose: 'supine',
     // Head tucked beside his, on the under-arm side.
-    joints: { lumbar: [10, 0, 0], thoracic: [8, 0, 0], neck: [20, -15, -20] },
-    root: { at: world(0, 0.13, 0.28), rot: backRot(40), k: 3, rk: 2.5 },
-    ghost: ['head', 'thighL', 'thighR', 'shinL', 'shinR', 'footL', 'footR', 'forearmL', 'forearmR'],
+    joints: { lumbar: [10, 0, 0], thoracic: [10, 0, 0], neck: [35, -25, -15] },
+    root: { at: world(0, 0.12, 0.02), rot: O.supine, k: 2, rk: 2 },
+    ghost: ['head', 'thighL', 'thighR', 'shinL', 'shinR', 'footL', 'footR', 'upperArmL', 'upperArmR', 'forearmL', 'forearmR'],
     reach: ['armL', 'armR', 'legL', 'legR'],
     limbs: {
       // Heels inside his thighs, knees out.
-      legL: { to: world(-0.07, 0.15, -0.24), pole: [1, 0.5, 0.4] },
-      legR: { to: world(0.07, 0.15, -0.24), pole: [-1, 0.5, 0.4] },
+      legL: { to: other('hipR', [0.06, -0.22, 0.12]), pole: [-1, 0, 0.6] },
+      legR: { to: other('hipL', [-0.06, -0.22, 0.12]), pole: [1, 0, 0.6] },
       armR: opts.choke
-        ? { to: other('chin', [0.12, -0.02, 0.0]), pole: [-0.2, 0.3, -1] }
-        : { to: other('sternum', [0.07, -0.04, 0.08]), pole: [-1, 0.25, -0.3] },
+        ? { to: other('chin', [0.13, -0.05, -0.02]), pole: [-1, -0.2, 0.4] }
+        : { to: other('sternum', [0.07, -0.02, 0.06]), pole: [-1, 0.2, 0.3] },
       armL: opts.choke
-        ? { to: other('backOfHead', [0.02, 0.04, -0.02]), pole: [0.6, 0.6, 0] }
-        : { to: other('sternum', [0.03, -0.1, 0.08]), pole: [0.5, -0.6, 0.2] },
+        ? { to: other('backOfHead', [0.03, 0.05, -0.03]), pole: [1, 0.3, 0.3] }
+        : { to: other('sternum', [0.04, -0.1, 0.06]), pole: [1, -0.5, 0.2] },
     },
   };
 }
 
-/** Defender sitting in front, leaning back into him, two hands on the choking arm. */
+/** Defender lying on the attacker's chest, two hands on the choking arm, knees up. */
 export function backBottom(): AthleteGoal {
   return {
-    pose: 'sit',
-    joints: { lumbar: [8, 0, 0], thoracic: [5, 0, 0], neck: [25, 0, 0] },
-    root: { at: world(0, 0.16, 0.02), rot: backRot(38), k: 2.5, rk: 2 },
-    ghost: ['forearmL', 'forearmR'],
-    reach: ['armL', 'armR'],
+    pose: 'supine',
+    joints: { lumbar: [5, 0, 0], thoracic: [5, 0, 0], neck: [30, 0, 0] },
+    root: { at: world(0, 0.33, 0.2), rot: O.supine, k: 2, rk: 2 },
+    ghost: ['upperArmL', 'upperArmR', 'forearmL', 'forearmR'],
     limbs: {
       armL: { to: other('wristR', [0, 0.04, 0]), pole: [0.6, -0.5, 0] },
-      armR: { to: other('elbowR', [0, -0.04, 0]), pole: [-0.6, -0.5, 0] },
-      legL: { to: world(-0.2, 0.09, -0.62), pole: [-0.5, 0.3, 1] },
-      legR: { to: world(0.2, 0.09, -0.62), pole: [0.5, 0.3, 1] },
+      armR: { to: other('wristR', [0, 0.12, 0]), pole: [-0.6, -0.5, 0] },
+      legL: { to: self('hipL', [0.12, -0.4, 0], 0.09), pole: [0.6, 0, 1] },
+      legR: { to: self('hipR', [-0.12, -0.4, 0], 0.09), pole: [-0.6, 0, 1] },
     },
   };
 }
@@ -276,8 +273,8 @@ export function northSouthTop(): AthleteGoal {
     joints: { neck: [-25, 0, 0] },
     root: { at: world(0, 0.33, -0.9), rot, k: 2.5, rk: 2 },
     limbs: {
-      legL: { mid: self('hipL', [0.12, -0.05, 0.3], MAT), lowerDir: [0.1, -1, 0.1] },
-      legR: { mid: self('hipR', [-0.12, -0.05, 0.3], MAT), lowerDir: [-0.1, -1, 0.1] },
+      legL: { mid: self('hipL', [0.14, -0.3, 0.22], MAT), lowerDir: [0.1, -1, -0.06] },
+      legR: { mid: self('hipR', [-0.14, -0.3, 0.22], MAT), lowerDir: [-0.1, -1, -0.06] },
       armL: { to: other('armpitL', [0.04, -0.06, -0.06]), pole: [0.6, -0.5, -0.5] },
       armR: { to: other('armpitR', [-0.04, -0.06, -0.06]), pole: [-0.6, -0.5, -0.5] },
     },
@@ -294,8 +291,8 @@ export function turtleBottom(): AthleteGoal {
     pose: 'turtle',
     root: { at: world(0, 0.4, 0.05), rot: TURTLE_ROT, k: 1.5, rk: 2 },
     limbs: {
-      legL: { mid: self('hipL', [0.02, 0.06, 0.32], MAT), lowerDir: [0, -1, 0.1] },
-      legR: { mid: self('hipR', [-0.02, 0.06, 0.32], MAT), lowerDir: [0, -1, 0.1] },
+      legL: { mid: self('hipL', [0.02, 0.06, 0.32], MAT), lowerDir: [0, -1, -0.06] },
+      legR: { mid: self('hipR', [-0.02, 0.06, 0.32], MAT), lowerDir: [0, -1, -0.06] },
       armL: { mid: self('hipL', [0.0, 0.3, 0.36], MAT), lowerDir: [0, 0.3, 1], bend: -120 },
       armR: { mid: self('hipR', [0.0, 0.3, 0.36], MAT), lowerDir: [0, 0.3, 1], bend: -120 },
     },
@@ -310,8 +307,8 @@ export function turtleTop(): AthleteGoal {
     pose: 'heavyChest',
     root: { at: other('hipsCenter', [0.34, 0.12, -0.3]), rot, k: 2.5, rk: 2 },
     limbs: {
-      [leg(headSide)]: { mid: self('hipL', [0.0, -0.05, 0.32], MAT), lowerDir: [0, -1, 0.1] },
-      [leg(flip(headSide))]: { mid: self('hipR', [0.0, -0.05, 0.32], MAT), lowerDir: [0, -1, 0.1] },
+      [leg(headSide)]: { mid: self('hipL', [0.0, -0.05, 0.32], MAT), lowerDir: [0, -1, -0.06] },
+      [leg(flip(headSide))]: { mid: self('hipR', [0.0, -0.05, 0.32], MAT), lowerDir: [0, -1, -0.06] },
       // Over the far shoulder and under the near armpit, hands meeting on his chest.
       [arm(headSide)]: { to: other('sternum', [0.0, 0.04, 0.12]), pole: [0, 1, 0] },
       [arm(flip(headSide))]: { to: other('sternum', [0.06, -0.06, 0.12]), pole: [0, -1, 0] },

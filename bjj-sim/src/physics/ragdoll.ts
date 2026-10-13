@@ -283,9 +283,9 @@ export class Ragdoll {
     if (k <= 0.001) return;
     const isHip = js.def.name.startsWith('hip');
     const I = (isHip ? HIP_I : SHOULDER_I) * (this.massKg / 80);
-    const w = (isHip ? 11 : 15) * Math.sqrt(Math.min(k, 1.5));
+    const w = (isHip ? EW_HIP : EW_ARM) * Math.sqrt(Math.min(k, 1.5));
     const kp = I * w * w;
-    const kd = 2 * I * w * 0.9;
+    const kd = 2 * I * w * EZ;
     const pq = qFromR(js.parent.rotation(), _q1);
     const wRel = fromR(js.child.angvel(), _b).sub(fromR(js.parent.angvel(), _c));
     // Stable PD: aim from where the arm will be a step from now.
@@ -384,6 +384,9 @@ const LIMB_SEGS = new Set<SegName>(['upperArmL', 'forearmL', 'upperArmR', 'forea
 const CALM_LIN = Number((globalThis as { process?: { env: Record<string, string> } }).process?.env?.CL ?? 2);
 const CALM_ANG = Number((globalThis as { process?: { env: Record<string, string> } }).process?.env?.CA ?? 5);
 const EXPL_ON = Number((globalThis as { process?: { env: Record<string, string> } }).process?.env?.EON ?? 1.6);
+const EW_ARM = Number((globalThis as { process?: { env: Record<string, string> } }).process?.env?.EWA ?? 8);
+const EW_HIP = Number((globalThis as { process?: { env: Record<string, string> } }).process?.env?.EWH ?? 7);
+const EZ = Number((globalThis as { process?: { env: Record<string, string> } }).process?.env?.EZ ?? 1.6);
 const MAX_BALL_ANGLE = 2.6; // rad (~150°)
 /** Whole-arm inertia about the shoulder for an 80 kg athlete (kg·m²). */
 const SHOULDER_I = 0.42;

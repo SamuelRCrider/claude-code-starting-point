@@ -207,7 +207,7 @@ const backChecks: Check[] = [
   {
     id: 'B7', who: 'bottom', label: 'Two-on-one',
     why: 'Both hands on the choking arm. Fight hands before anything else.',
-    test: (c) => c.lm('bottom', 'handL').distanceTo(c.lm('top', 'wristR')) < 0.2 && c.lm('bottom', 'handR').distanceTo(c.lm('top', 'elbowR')) < 0.25,
+    test: (c) => c.lm('bottom', 'handL').distanceTo(c.lm('top', 'wristR')) < 0.25 && c.lm('bottom', 'handR').distanceTo(c.lm('top', 'wristR')) < 0.3,
   },
   {
     id: 'B7b', who: 'bottom', label: 'Chin tucked',
@@ -390,7 +390,7 @@ export const POSITIONS: Position[] = [
     id: 'back',
     name: 'Back control',
     points: 4,
-    blurb: 'Chest to back, hooks in, seatbelt. The best position in jiu-jitsu.',
+    blurb: 'Chest to back, hooks in, seatbelt. Shown here on the ground. The best position in jiu-jitsu.',
     topName: 'Attacker',
     bottomName: 'Defender',
     setup: kf(backTop(), backBottom()),

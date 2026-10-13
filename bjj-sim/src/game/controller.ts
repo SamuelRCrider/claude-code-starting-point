@@ -154,7 +154,9 @@ export class AthleteController {
       }
       if (lg.grip && !this.noGrips() && !this.hasGrip(limb) && this.blendT > 0.3) {
         const end = b.pointOn(def.lower, def.endLocal);
-        if (end.distanceTo(target) < 0.2 && 'who' in lg.to) this.makeGrip(limb, lg.to, end);
+        // Grips on the partner become real joints. Grabbing your own wrist (figure-four)
+        // stays a pose: a joint inside one body makes a closed loop the muscles fight.
+        if (end.distanceTo(target) < 0.2 && 'who' in lg.to && lg.to.who === 'other') this.makeGrip(limb, lg.to, end);
       }
     }
   }

@@ -28,6 +28,8 @@ export function merge(...goals: (AthleteGoal | undefined)[]): AthleteGoal {
     if (g.pose !== undefined) out.pose = g.pose;
     if (g.root !== undefined) out.root = g.root;
     if (g.tension !== undefined) out.tension = g.tension;
+    if (g.ghost !== undefined) out.ghost = g.ghost;
+    if (g.reach !== undefined) out.reach = g.reach;
     if (g.joints) out.joints = { ...(out.joints ?? {}), ...g.joints };
     if (g.limbs) out.limbs = { ...(out.limbs ?? {}), ...g.limbs };
   }

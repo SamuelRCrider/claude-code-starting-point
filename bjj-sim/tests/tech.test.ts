@@ -9,6 +9,7 @@ import { positionById } from '../src/content/positions';
 import { handlePos } from '../src/game/interaction';
 import type { DragPart } from '../src/content/types';
 import type { Who } from '../src/physics/sim';
+import { SEGMENTS } from '../src/physics/skeleton';
 
 beforeAll(async () => { await initPhysics(); });
 const f = (v: Vector3) => `${v.x.toFixed(2)},${v.y.toFixed(2)},${v.z.toFixed(2)}`;
@@ -45,7 +46,10 @@ for (const id of ids) {
       }
       const ke = sim.top.kineticEnergy() + sim.bottom.kineticEnergy();
       maxKE = Math.max(maxKE, ke);
-      lines.push(`#${i} ${s.say.slice(0, 50)} | KE=${ke.toFixed(1)}\n    ${parts.join('\n    ')}`);
+      const movers = [...sim.top.bodies.map((b, k) => ['T' + SEGMENTS[k].name, b] as const), ...sim.bottom.bodies.map((b, k) => ['B' + SEGMENTS[k].name, b] as const)]
+        .map(([n, b]) => { const v = b.linvel(); return [n, Math.hypot(v.x, v.y, v.z)] as const; }).sort((a, b) => b[1] - a[1]).slice(0, 3)
+        .map(([n, v]) => `${n}:${v.toFixed(1)}`).join(' ');
+      lines.push(`#${i} ${s.say.slice(0, 50)} | KE=${ke.toFixed(1)} movers ${movers}\n    ${parts.join('\n    ')}`);
     });
     lines.push(`end: top pelvis ${f(sim.top.segPos('pelvis'))} head ${f(sim.top.segPos('head'))} | bottom pelvis ${f(sim.bottom.segPos('pelvis'))} head ${f(sim.bottom.segPos('head'))}`);
     if (process.env.DIAG) console.log(`=== ${id}\n` + lines.join('\n'));
