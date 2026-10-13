@@ -40,6 +40,8 @@ export interface InteractionHooks {
   /** Optional snap target for a part (the current step's ghost). */
   snapFor(who: Who, part: DragPart): THREE.Vector3 | null;
   canDrag(who: Who): boolean;
+  /** The part the lesson is asking for: a press near it always picks it. */
+  cue?(): { who: Who; part: DragPart; mode: 'end' | 'mid' } | null;
   onDragStart?(d: DragState): void;
   onDragEnd?(d: DragState): void;
   onSnap?(d: DragState): void;
@@ -90,6 +92,11 @@ export class Interaction {
   /** Find what's under the pointer: a mesh hit, or the nearest handle within a finger's reach. */
   pick(e: PointerEvent): { who: Who; part: DragPart; mode: 'end' | 'mid'; point: THREE.Vector3 } | null {
     this.setNdc(e);
+    const cue = this.hooks.cue?.();
+    if (cue) {
+      const p = handlePos(this.sim, cue.who, cue.part, cue.mode);
+      if (this.screenDist(e, p) < SNAP_PX * 1.2) return { ...cue, point: p };
+    }
     const hits = this.ray.intersectObjects(this.r.pickables, false);
     for (const h of hits) {
       const { who, seg } = h.object.userData as { who: Who; seg: SegName };

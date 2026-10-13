@@ -20,8 +20,9 @@ await page.screenshot({ path: 'shots/e2e-2-position.png' });
 const chips = await page.$$eval('.chip', (els) => els.map((e) => `${e.textContent}:${e.classList.contains('ok')}`));
 console.log('chips', chips.join(', '));
 
-// Learn the first technique of the learner role.
-await page.click('.tech .btn.primary >> nth=0');
+// Learn the first technique of the learner role (or TECH=<id>).
+if (process.env.TECH) await page.evaluate((id) => window.__app.go({ kind: 'lesson', pos: window.__techFrom(id), tech: id, mode: 'learn' }), process.env.TECH);
+else await page.click('.tech .btn.primary >> nth=0');
 await adv(1.2);
 await page.waitForTimeout(150);
 await page.screenshot({ path: 'shots/e2e-3-lesson.png' });
@@ -39,7 +40,9 @@ for (let guard = 0; guard < 14; guard++) {
     const [fx, fy] = st.cue.from; const [tx, ty] = st.cue.to;
     await page.mouse.move(fx, fy);
     await page.mouse.down();
+    console.log('  grabbed:', JSON.stringify(await page.evaluate(() => { const d = window.__app.interaction.drag; return d ? { who: d.who, part: d.part, mode: d.mode } : null; })), 'cue from/to px', st.cue.from.map(Math.round), st.cue.to.map(Math.round));
     for (let k = 1; k <= 12; k++) { await page.mouse.move(fx + (tx - fx) * k / 12, fy + (ty - fy) * k / 12); await adv(0.06); }
+    console.log('  after move:', JSON.stringify(await page.evaluate(() => { const d = window.__app.interaction.drag; const c = window.__app.director.cue(); return { snapped: d?.snapped, dist: c ? c.from.distanceTo(c.to).toFixed(3) : null, tgt: d?.target.toArray().map((x) => x.toFixed(2)), cueTo: c?.to.toArray().map((x) => x.toFixed(2)) }; })));
     await adv(0.6);
     const after = await page.evaluate(() => window.__app.director.stepIndex);
     if (after === st.i && !(await page.evaluate(() => window.__app.director.busy))) {

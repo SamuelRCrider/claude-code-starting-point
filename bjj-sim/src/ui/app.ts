@@ -52,6 +52,7 @@ export class App {
       snapFor: (who, part) => this.director.targetFor(who, part),
       canDrag: (who) => this.screen.kind !== 'home' && !(this.director.mode === 'watch' && this.screen.kind === 'lesson') && (this.screen.kind !== 'lesson' || this.director.step?.drag?.who === who || !this.director.step?.drag),
       onSnap: () => this.buzz(8),
+      cue: () => this.director.cue(),
       onDragStart: () => this.hideGestureHint(),
     });
 
@@ -252,8 +253,8 @@ export class App {
           )
         : h('div', { class: 'step-actions' }, h('span', { class: 'hint' }, watch ? 'Watching. Tap a body part any time to interfere.' : 'Watch the reaction…')),
     );
-    if (s.auto || watch) this.caption(s.say);
-    else this.caption(null);
+    // The sheet already shows the text while learning; captions are for watching.
+    this.caption(watch ? s.say : null);
   }
 
   private onFinished() {
@@ -355,15 +356,23 @@ export class App {
   frameCamera(instant = false) {
     const c = this.center();
     const portrait = this.r.canvas.clientWidth < this.r.canvas.clientHeight;
-    const off = portrait ? new THREE.Vector3(2.0, 2.2, 1.5) : new THREE.Vector3(2.1, 1.35, 1.05);
-    // In portrait the sheet covers the lower screen, so aim a little low to lift the athletes.
-    const target = c.clone().add(new THREE.Vector3(0, portrait ? -0.35 : 0, 0));
+    const pos = this.screen.kind === 'position' ? positionById(this.screen.id) : this.screen.kind === 'lesson' ? positionById(this.screen.pos) : null;
+    const base = pos?.camera ? new THREE.Vector3(...pos.camera) : new THREE.Vector3(2.1, 1.35, 1.05);
+    // Portrait: further back and higher so both athletes clear the bottom sheet.
+    const off = portrait ? base.clone().multiplyScalar(1.05).add(new THREE.Vector3(0, 0.85, 0)) : base;
+    // In portrait the sheet covers the lower screen, so aim low to lift the athletes
+    // into the visible band (lower still on home, where the sheet is taller).
+    const drop = portrait ? (this.screen.kind === 'home' ? -0.75 : -0.4) : 0;
+    const target = c.clone().add(new THREE.Vector3(0, drop, 0));
     this.r.flyTo(c.clone().add(off), target, instant);
     this.camCenter.copy(c);
   }
 
   /** Per-frame: camera follow, cues, director tick. */
   frame(dt: number) {
+    const d = this.interaction.drag;
+    const cue = this.director.cue();
+    this.director.snapped = !!(d && d.snapped && cue && d.who === cue.who && d.part === cue.part);
     this.director.update(dt * this.sim.timeScale);
     if (this.follow && this.screen.kind !== 'home') {
       // Gently keep the action centred without fighting the user's orbit.
@@ -378,7 +387,6 @@ export class App {
       const t = this.r.controls.target;
       this.r.camera.position.sub(t).applyAxisAngle(new THREE.Vector3(0, 1, 0), dt * 0.12).add(t);
     }
-    const cue = this.director.cue();
     if (cue && this.screen.kind === 'lesson') {
       const from = this.interaction.drag ? handlePos(this.sim, cue.who, cue.part, cue.mode) : cue.from;
       this.cues.showCue(from, cue.to, dt);

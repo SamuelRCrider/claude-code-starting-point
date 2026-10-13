@@ -75,6 +75,8 @@ export interface Position {
   checks: Check[];
   /** Concepts shown on the position screen. */
   concepts: { who: Who; text: string }[];
+  /** Camera offset from the action (meters). Default: from the bottom athlete's left. */
+  camera?: V3;
   /** Sandbox intent buttons that tweak the current position. */
   tweaks?: { who: Who; label: string; key: Keyframe }[];
 }

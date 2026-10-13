@@ -343,6 +343,7 @@ export const POSITIONS: Position[] = [
     topName: 'Top',
     bottomName: 'Bottom',
     setup: kf(sideControlTop(), sideControlBottom()),
+    camera: [-2.0, 1.4, 0.7],
     checks: sideChecks,
     concepts: [
       { who: 'top', text: 'Crossface: drive your shoulder into his jaw so he looks away from you.' },
@@ -384,6 +385,7 @@ export const POSITIONS: Position[] = [
     topName: 'Top',
     bottomName: 'Bottom',
     setup: kf(kneeOnBellyTop(), merge(supineAt(0, 0), { limbs: { ...framesTight(), ...feetPlanted() } })),
+    camera: [-2.0, 1.4, 0.7],
     checks: kobChecks,
     concepts: [
       { who: 'top', text: 'Shin diagonal across his belly, foot hooked by his far hip.' },

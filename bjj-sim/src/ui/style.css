@@ -62,7 +62,7 @@ button:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); o
   display: flex; flex-direction: column; gap: 12px;
 }
 .grip { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 4px auto 0; flex: none; }
-.home-sheet { max-height: 64%; }
+.home-sheet { max-height: 56%; }
 .lesson-sheet { max-height: 46%; }
 @media (min-width: 900px) {
   .sheet { left: 16px; right: auto; top: calc(env(safe-area-inset-top, 0px) + 72px); bottom: 16px; width: var(--sheet-max); max-height: none; border-radius: 20px; border: 1px solid var(--line); }

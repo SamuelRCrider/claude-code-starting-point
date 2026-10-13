@@ -30,6 +30,8 @@ export class Director {
   private holdNear = 0;
   private checkTimer = 0;
   readonly ctx: CheckCtx;
+  /** Set by the UI while the learner holds the cued part snapped onto its target. */
+  snapped = false;
   /** Who the learner is controlling in explore mode. */
   focus: Who = 'top';
 
@@ -157,8 +159,11 @@ export class Director {
       // Drag-to-target completes the step once the part is held near the ghost.
       const c = this.cue();
       if (c) {
-        this.holdNear = c.from.distanceTo(c.to) < 0.12 ? this.holdNear + dt : 0;
-        if (this.holdNear > 0.2) this.perform();
+        // Done when the part arrives, or when the learner holds it snapped onto the
+        // target (bodies can stop a few cm short against the opponent).
+        const near = c.from.distanceTo(c.to) < 0.12 || (this.snapped && c.from.distanceTo(c.to) < (c.part === 'hips' ? 0.5 : 0.3));
+        this.holdNear = near ? this.holdNear + dt : 0;
+        if (this.holdNear > 0.25) this.perform();
       }
     }
     this.checkTimer -= dt;

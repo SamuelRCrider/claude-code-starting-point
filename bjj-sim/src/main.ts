@@ -13,10 +13,14 @@ async function boot() {
   r.addAthlete('bottom');
   const sim = new Sim();
   const app = new App(sim, r);
-  Object.assign(window as object, { __sim: sim, __r: r, __app: app, __techFrom: (id: string) => TECHNIQUES.find((t) => t.id === id)?.from });
-  // Deterministic stepping for automated captures.
-  Object.assign(window as object, {
+  // Hooks for the capture/e2e tools in tools/ (dev server only).
+  if (import.meta.env.DEV) Object.assign(window as object, {
+    __sim: sim, __r: r, __app: app,
+    __techFrom: (id: string) => TECHNIQUES.find((t) => t.id === id)?.from,
     __glide: setForceGlide,
+    __techIds: () => TECHNIQUES.map((t) => t.id),
+    // Seconds for a watch-mode run to reach the end of a technique.
+    __techTime: (id: string) => TECHNIQUES.find((t) => t.id === id)!.steps.reduce((a, s) => a + (s.delay ?? 1.1) + (s.key.dur ?? 0.8) + 0.5, 0.5),
     __advance: (sec: number) => {
       for (let i = 0; i < Math.round(sec / STEP); i++) { sim.stepOnce(); app.frame(STEP); }
       r.sync(sim.top, sim.bottom);
